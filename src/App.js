@@ -7,17 +7,19 @@ import 'react-table/react-table.css';
 import MaterialTable from 'material-table';
 import axios from "axios";
 class App extends Component {
-  tableRef = React.createRef();
   constructor(props) {
     super(props);
+	//set state values to access from DOM
     this.state = { value_age: 'Age', value_gender: 'Gender', vakue_data: 'data1' };
 
   }
 
   async subm() {
     var arraydata = [];
+	//run get query by axios based on to other comboboxes values
     await axios.get(encodeURI("http://localhost:3000/recommendFood?ages=" + this.state.value_age + "&gender=" + this.state.value_gender))
       .then(result => {
+		  // convert JSON to striong to prepare for building message sentences.
         var ages = JSON.stringify(result.data);
         var jsarr = [];
         jsarr = eval('(' + ages + ')');
@@ -25,12 +27,13 @@ class App extends Component {
         var i;
         var itm = [];
         for (i = 0; i < jsarr.length; i++) {
+			//build message sentences based on JSON string keys and vlues
           var vals = 'Please serve ' + jsarr[i].servings + ' time ' + jsarr[i].srvg_sz + ' of ' + jsarr[i].food + ' in the ' + jsarr[i].foodgroup + ' group ' + ' based on following instruction:\n'
             + jsarr[i].directional;
-          // record['agehead']=vals;
           var record = {};
           record['agehead'] = vals;
           var placeholder = [];
+		  // push and merge to arraydata to provide data for the table
           placeholder.push(record);
           arraydata = [...arraydata, ...placeholder];
 
@@ -38,9 +41,11 @@ class App extends Component {
       }, error => {
         console.error(error);
       });
+	 //provide data values for the defined state
     this.setState({ data1: arraydata })
   }
   render() {
+	  //define constant values of the table and comboboxes
     let gender = ['Male', 'Female'];
     let ages = ['2 to 3',
       '4 to 8',
@@ -80,7 +85,6 @@ class App extends Component {
         </div>
         <div className="Table-style">
           <MaterialTable
-            tableRef={this.tableRef}
             data={this.state.data1}
             columns={columns}
             title="Recommendations"
